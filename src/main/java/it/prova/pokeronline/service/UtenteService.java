@@ -2,6 +2,7 @@ package it.prova.pokeronline.service;
 
 import java.util.List;
 
+import it.prova.pokeronline.model.Ruolo;
 import it.prova.pokeronline.model.Utente;
 
 public interface UtenteService {
@@ -17,4 +18,6 @@ public interface UtenteService {
 	void rimuovi(Utente utenteInstance);
 
 	List<Utente> findByExample(Utente example);
+
+	void aggiungiRuolo(Utente utenteEsistente, Ruolo ruoloInstance);
 }

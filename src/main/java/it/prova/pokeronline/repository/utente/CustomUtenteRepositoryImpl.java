@@ -10,7 +10,9 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
+import it.prova.pokeronline.model.Ruolo;
 import it.prova.pokeronline.model.Utente;
 
 public class CustomUtenteRepositoryImpl implements CustomUtenteRepository {
@@ -18,6 +20,16 @@ public class CustomUtenteRepositoryImpl implements CustomUtenteRepository {
 	@PersistenceContext
 	private EntityManager entityManager;
 
+	@Transactional
+	public void aggiungiRuolo(Utente utenteEsistente, Ruolo ruoloInstance) {
+		
+		//ruoloInstance = entityManager.merge(ruoloInstance);
+		//utenteEsistente = entityManager.merge(utenteEsistente);
+		
+
+		utenteEsistente.getRuoli().add(ruoloInstance);
+	}
+	
 	@Override
 	public List<Utente> findByExample(Utente example) {
 		Map<String, Object> paramaterMap = new HashMap<String, Object>();

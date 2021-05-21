@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.prova.pokeronline.model.Ruolo;
 import it.prova.pokeronline.model.Utente;
+import it.prova.pokeronline.repository.ruolo.RuoloRepository;
 import it.prova.pokeronline.repository.utente.UtenteRepository;
 
 @Service
@@ -13,6 +15,9 @@ public class UtenteServiceImpl implements UtenteService {
 
 	@Autowired
 	private UtenteRepository repository;
+	
+	@Autowired
+	private RuoloRepository ruoloRepository;
 
 	@Override
 	public List<Utente> listAllElements() {
@@ -42,6 +47,12 @@ public class UtenteServiceImpl implements UtenteService {
 	@Override
 	public List<Utente> findByExample(Utente example) {
 		return repository.findByExample(example);
+	}
+	
+	@Override
+	public void aggiungiRuolo(Utente utenteEsistente, Ruolo ruoloInstance) {
+		//ruoloRepository.findById(ruoloInstance.getId());
+		repository.aggiungiRuolo(utenteEsistente, ruoloInstance);
 	}
 
 }
