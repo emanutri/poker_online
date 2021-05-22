@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.prova.pokeronline.model.Ruolo;
+import it.prova.pokeronline.model.StatoUtente;
 import it.prova.pokeronline.model.Utente;
 import it.prova.pokeronline.service.RuoloService;
 import it.prova.pokeronline.service.UtenteService;
@@ -29,7 +30,7 @@ public class UtenteController {
 
 	@Autowired
 	private UtenteService utenteService;
-	
+
 	@Autowired
 	private RuoloService ruoloService;
 
@@ -53,12 +54,12 @@ public class UtenteController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public Utente createNew(@Valid @RequestBody Utente utenteInput) {
-		
-		if(utenteInput.getRuoli() != null) {
-			for(Ruolo ruoloInstance: utenteInput.getRuoli())
-				utenteService.aggiungiRuolo(utenteInput, ruoloInstance);
-			
-		}
+
+//		if(utenteInput.getRuoli() != null) {
+//			for(Ruolo ruoloInstance: utenteInput.getRuoli())
+//				utenteService.aggiungiRuolo(utenteInput, ruoloInstance);
+//			
+//		}
 		return utenteService.inserisciNuovo(utenteInput);
 	}
 
@@ -81,11 +82,25 @@ public class UtenteController {
 		if (utente == null)
 			throw new UtenteNotFoundException("Utente not found con id: " + id);
 
-		utenteService.rimuovi(utente);
+		// utenteService.rimuovi(utente);
+		utente.setStato(StatoUtente.DISABILITATO);
+		utente.setId(id);
+		utenteService.aggiorna(utente);
 	}
 
 	@PostMapping("/search")
 	public List<Utente> search(@RequestBody Utente example) {
 		return utenteService.findByExample(example);
+	}
+	
+	@PutMapping("/credito/{id}")
+	public Utente compraCredito(@RequestBody Double credito, @PathVariable(required = true) Long id) {
+		Utente utente = utenteService.caricaSingoloElemento(id);
+
+		if (utente == null)
+			throw new UtenteNotFoundException("Utente not found con id: " + id);
+
+		utente.setCredito(credito);
+		return utenteService.aggiorna(utente);
 	}
 }
