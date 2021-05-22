@@ -1,7 +1,6 @@
 package it.prova.pokeronline.web.api;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -17,10 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import it.prova.pokeronline.model.Ruolo;
 import it.prova.pokeronline.model.StatoUtente;
 import it.prova.pokeronline.model.Utente;
-import it.prova.pokeronline.service.RuoloService;
 import it.prova.pokeronline.service.UtenteService;
 import it.prova.pokeronline.web.api.exception.UtenteNotFoundException;
 
@@ -30,9 +27,6 @@ public class UtenteController {
 
 	@Autowired
 	private UtenteService utenteService;
-
-	@Autowired
-	private RuoloService ruoloService;
 
 	@GetMapping
 	public List<Utente> getAll() {
@@ -92,7 +86,7 @@ public class UtenteController {
 	public List<Utente> search(@RequestBody Utente example) {
 		return utenteService.findByExample(example);
 	}
-	
+
 	@PutMapping("/credito/{id}")
 	public Utente compraCredito(@RequestBody Double credito, @PathVariable(required = true) Long id) {
 		Utente utente = utenteService.caricaSingoloElemento(id);
