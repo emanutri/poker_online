@@ -44,4 +44,6 @@ public class TavoloServiceImpl implements TavoloService {
 		return repository.findByExample(example);
 	}
 
+//	@Override
+//	public void accediTavolo(Tavolo tavoloInstance)
 }

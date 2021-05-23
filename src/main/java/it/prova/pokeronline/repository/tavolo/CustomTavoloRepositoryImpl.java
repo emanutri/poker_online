@@ -26,11 +26,12 @@ public class CustomTavoloRepositoryImpl implements CustomTavoloRepository {
 		StringBuilder queryBuilder = new StringBuilder("select t from Tavolo t left join fetch t.utenti u where 1 = 1 ");
 
 		if (example.getEsperienzaMin() != null) {
-			whereClauses.add(" t.esperienzaMin  >= :esperienzaMin ");
+//			System.out.println("BBBBBBBBBBBBBBB"+example);
+			whereClauses.add(" t.esperienzaMin  <= :esperienzaMin ");
 			paramaterMap.put("esperienzaMin", example.getEsperienzaMin());
 		}
 		if (example.getCifraMinima() != null) {
-			whereClauses.add(" t.cifraMinima  >= :cifraMinima ");
+			whereClauses.add(" t.cifraMinima  <= :cifraMinima ");
 			paramaterMap.put("cifraMinima", example.getCifraMinima());
 		}
 		if (StringUtils.isNotEmpty(example.getDenominazione())) {
