@@ -197,4 +197,10 @@ public class Utente {
 		this.tavolo = tavolo;
 	}
 
+	@Override
+	public String toString() {
+		return "Utente [id=" + id + ", username=" + username + ", esperienzaAccumulata=" + esperienzaAccumulata
+				+ ", credito=" + credito + "]";
+	}
+
 }

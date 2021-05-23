@@ -87,8 +87,7 @@ public class PlayerController {
 		return tavoloService.findByExample(tavoloExample);
 	}
 
-	// unisciti tavolo
-	@PostMapping("/unisciti")
+	@PostMapping("/unisciti/{id}")
 	public String uniscitiTavolo(@PathVariable(required = true) Long id,
 			@RequestHeader("authorization") String utenteRole, @RequestHeader("utenteId") String utenteId) {
 
@@ -107,14 +106,14 @@ public class PlayerController {
 					"Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica");
 		}
 		if (utente.getEsperienzaAccumulata() < tavolo.getEsperienzaMin()) {
-			throw new UnouthorizedException(
-					"Non hai sufficiente esperienza per giocare a questo tavolo");
+			throw new UnouthorizedException("Non hai sufficiente esperienza per giocare a questo tavolo");
 		}
 
 		if (!tavolo.getUtenti().contains(utente)) {
-			
-			tavolo.getUtenti().add(utente);
-			tavoloService.aggiorna(tavolo);
+
+			utente.setTavolo(tavolo);
+			utenteService.aggiorna(utente);
+
 			messaggio = "Sei entrato con successo al tavolo: " + tavolo.getDenominazione();
 			return messaggio;
 		} else {
@@ -139,18 +138,6 @@ public class PlayerController {
 
 		Tavolo tavolo = tavoloService.caricaSingoloElemento(id);
 
-//		if (utente.getCredito() < tavolo.getCifraMinima()) {
-//			throw new NoCreditException(
-//					"Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica");
-//		}
-
-		// dopo aver controllato se ha abbastanza credito, lo aggiungo al tavolo
-		// se non si era aggiunto
-//		if (!tavolo.getUtenti().contains(utente)) {
-//			tavolo.getUtenti().add(utente);
-//			tavoloService.aggiorna(tavolo);
-//		}
-
 		if (!tavolo.getUtenti().contains(utente)) {
 			messaggio = "Attenzione!! Prima di giocare è necessario unirsi al tavolo";
 			return messaggio;
@@ -166,14 +153,12 @@ public class PlayerController {
 		}
 		Integer somma = (int) (Math.random() * 1000);
 		Double tot = segno * somma;
-		System.out.println("PRIMAAA" + utente.getCredito());
-		System.out.println(segno + "---" + somma + "---" + tot);
+
 		// modifico il credito e salvo il credito residuo utente
 		Double credito = utente.getCredito();
 		credito = credito + tot;
 		utente.setCredito(credito);
 		utenteService.aggiorna(utente);
-		System.out.println("DOPOOO" + utente.getCredito());
 
 		// se ha perso
 		if (tot <= 0) {
@@ -199,5 +184,29 @@ public class PlayerController {
 			messaggio = "Complimenti! Hai vinto:" + tot + " Non dimenticare di dare la mancia al croupier!";
 		}
 		return messaggio;
+	}
+
+	@PostMapping("/abbandona/{id}")
+	public String abbandonaPartita(@PathVariable(required = true) Long id,
+			@RequestHeader("authorization") String utenteRole, @RequestHeader("utenteId") String utenteId) {
+
+		if (!utenteRole.equals("admin") && !utenteRole.equals("special player")
+				&& !utenteRole.equals("simple player")) {
+			throw new UnouthorizedException("Utente non autorizzato");
+		}
+
+		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
+
+		// disaccoppio tavolo da utente
+		utente.setTavolo(null);
+
+		// aggiorno l'esperienza
+		utente.setEsperienzaAccumulata(utente.getEsperienzaAccumulata() + 1);
+		utenteService.aggiorna(utente);
+
+		String messaggio = "Uscita dal tavolo avvenuta con successo";
+
+		return messaggio;
+
 	}
 }
