@@ -18,8 +18,6 @@ import it.prova.pokeronline.service.UtenteService;
 import it.prova.pokeronline.web.api.exception.NoCreditException;
 import it.prova.pokeronline.web.api.exception.UnouthorizedException;
 import it.prova.pokeronline.web.api.exception.UtenteNotFoundException;
-import it.prova.pokeronline.web.api.exception.YouLostException;
-import it.prova.pokeronline.web.api.exception.YouWinException;
 
 @RestController
 @RequestMapping("api/player")
@@ -89,12 +87,49 @@ public class PlayerController {
 		return tavoloService.findByExample(tavoloExample);
 	}
 
-	@PostMapping("/gioca/{id}")
-	public String giocaPartita(@PathVariable(required = true) Long id, @RequestHeader("authorization") String utenteRole,
-			@RequestHeader("utenteId") String utenteId) {
-		
+	// unisciti tavolo
+	@PostMapping("/unisciti")
+	public String uniscitiTavolo(@PathVariable(required = true) Long id,
+			@RequestHeader("authorization") String utenteRole, @RequestHeader("utenteId") String utenteId) {
+
 		String messaggio;
-		
+
+		if (!utenteRole.equals("admin") && !utenteRole.equals("special player")
+				&& !utenteRole.equals("simple player")) {
+			throw new UnouthorizedException("Utente non autorizzato");
+		}
+
+		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
+		Tavolo tavolo = tavoloService.caricaSingoloElemento(id);
+
+		if (utente.getCredito() < tavolo.getCifraMinima()) {
+			throw new NoCreditException(
+					"Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica");
+		}
+		if (utente.getEsperienzaAccumulata() < tavolo.getEsperienzaMin()) {
+			throw new UnouthorizedException(
+					"Non hai sufficiente esperienza per giocare a questo tavolo");
+		}
+
+		if (!tavolo.getUtenti().contains(utente)) {
+			
+			tavolo.getUtenti().add(utente);
+			tavoloService.aggiorna(tavolo);
+			messaggio = "Sei entrato con successo al tavolo: " + tavolo.getDenominazione();
+			return messaggio;
+		} else {
+			messaggio = "Sei già unito a questo tavolo: " + tavolo.getDenominazione();
+			return messaggio;
+		}
+
+	}
+
+	@PostMapping("/gioca/{id}")
+	public String giocaPartita(@PathVariable(required = true) Long id,
+			@RequestHeader("authorization") String utenteRole, @RequestHeader("utenteId") String utenteId) {
+
+		String messaggio;
+
 		if (!utenteRole.equals("admin") && !utenteRole.equals("special player")
 				&& !utenteRole.equals("simple player")) {
 			throw new UnouthorizedException("Utente non autorizzato");
@@ -104,15 +139,21 @@ public class PlayerController {
 
 		Tavolo tavolo = tavoloService.caricaSingoloElemento(id);
 
-		if (utente.getCredito() < tavolo.getCifraMinima()) {
-			throw new NoCreditException(
-					"Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica");
-		}
+//		if (utente.getCredito() < tavolo.getCifraMinima()) {
+//			throw new NoCreditException(
+//					"Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica");
+//		}
 
 		// dopo aver controllato se ha abbastanza credito, lo aggiungo al tavolo
+		// se non si era aggiunto
+//		if (!tavolo.getUtenti().contains(utente)) {
+//			tavolo.getUtenti().add(utente);
+//			tavoloService.aggiorna(tavolo);
+//		}
+
 		if (!tavolo.getUtenti().contains(utente)) {
-			tavolo.getUtenti().add(utente);
-			tavoloService.aggiorna(tavolo);
+			messaggio = "Attenzione!! Prima di giocare è necessario unirsi al tavolo";
+			return messaggio;
 		}
 
 		// gioca
@@ -147,21 +188,15 @@ public class PlayerController {
 				utente.setEsperienzaAccumulata(utente.getEsperienzaAccumulata() + 1);
 				utenteService.aggiorna(utente);
 
-				messaggio ="Hai perso: "+tot+" Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica";
-//				// l'ancio l'eccezione per informarlo
-//				throw new NoCreditException("Hai perso:" + tot
-//						+ " Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica");
+				messaggio = "Hai perso: " + tot
+						+ " Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica";
 			} else {
 				// se può ancora giocare, allora informo solo della sconfitta
-				messaggio = "Hai perso: "+tot;
-//				throw new YouLostException("Hai perso: " + tot);
+				messaggio = "Hai perso: " + tot;
 			}
 		} else {
 			// se ha vinto
 			messaggio = "Complimenti! Hai vinto:" + tot + " Non dimenticare di dare la mancia al croupier!";
-//			// l'ancio l'eccezione per informarlo
-//			throw new YouWinException(
-//					"Complimenti! Hai vinto:" + tot + " Non dimenticare di dare la mancia al croupier!");
 		}
 		return messaggio;
 	}
