@@ -106,7 +106,6 @@ public class UtenteController {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		// utenteService.rimuovi(utente);
 		utenteInstance.setStato(StatoUtente.DISABILITATO);
 		utenteInstance.setId(id);
 		utenteService.aggiorna(utenteInstance);

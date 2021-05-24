@@ -3,6 +3,7 @@ package it.prova.pokeronline.web.api;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,16 +35,8 @@ public class PlayerController {
 	private RuoloService ruoloService;
 
 	// utente acquista per se stesso, non per gli altri
-	// non passo id in url, (ma nell'header), per avere una delle possibili
-	// gestioni differente dalle altre:
-	// {id}/*@PathVariable(required = true) Long id,*/
 	@PutMapping("/acquista")
-	public Utente compraCredito(@RequestBody Double credito,
-			@RequestHeader("authorization") String username/*
-															 * ,
-															 * 
-															 * @RequestHeader("utenteId") String utenteId
-															 */) {
+	public Utente compraCredito(@RequestBody Double credito, @RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -56,21 +49,14 @@ public class PlayerController {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-//		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
-
 		Double creditoUtente = utenteInstance.getCredito();
 
 		utenteInstance.setCredito(creditoUtente + credito);
 		return utenteService.aggiorna(utenteInstance);
 	}
 
-	@PostMapping("/last")
-	public List<Tavolo> lastGame(
-			@RequestHeader("authorization") String username/*
-															 * ,
-															 * 
-															 * @RequestHeader("utenteId") String utenteId
-															 */) {
+	@GetMapping("/last")
+	public List<Tavolo> lastGame(@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -80,15 +66,13 @@ public class PlayerController {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-//		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
-
 		Tavolo tavoloExample = new Tavolo();
 		tavoloExample.getUtenti().add(utenteInstance);
 
 		return tavoloService.findByExample(tavoloExample);
 	}
 
-	@PostMapping("/search")
+	@GetMapping("/search")
 	public List<Tavolo> ricercaTavolo(@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
@@ -100,7 +84,6 @@ public class PlayerController {
 		}
 
 		// cerco tavolo per esperienza
-//		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
 		Double esperienza = utenteInstance.getEsperienzaAccumulata();
 
 		return tavoloService.trovaTavoliByEsperienza(esperienza);
@@ -164,6 +147,11 @@ public class PlayerController {
 			messaggio = "Attenzione!! Prima di giocare è necessario unirsi al tavolo";
 			return messaggio;
 		}
+		
+		if (utenteInstance.getCredito() < tavolo.getCifraMinima()) {
+			messaggio = "Attenzione!! Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica.";
+			return messaggio;
+		}
 
 		// gioca
 		// se segno >=0.5 segno positivo, negativo altrimenti.
@@ -188,15 +176,15 @@ public class PlayerController {
 			if (utenteInstance.getCredito() < tavolo.getCifraMinima()) {
 				// se l'utente ha superato il credito minimo
 				// lo mando via dal tavolo
-				tavolo.getUtenti().remove(utenteInstance);
-				tavoloService.aggiorna(tavolo);
+				utenteInstance.setTavolo(null);
+				utenteService.aggiorna(utenteInstance);
 
 				// aggiorno l'esperienza
 				utenteInstance.setEsperienzaAccumulata(utenteInstance.getEsperienzaAccumulata() + 1);
 				utenteService.aggiorna(utenteInstance);
 
 				messaggio = "Hai perso: " + tot
-						+ " Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica";
+						+ " Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica. Uscita in corso...";
 			} else {
 				// se può ancora giocare, allora informo solo della sconfitta
 				messaggio = "Hai perso: " + tot;
