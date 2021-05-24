@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.prova.pokeronline.model.StatoUtente;
 import it.prova.pokeronline.model.Utente;
+import it.prova.pokeronline.service.RuoloService;
 import it.prova.pokeronline.service.UtenteService;
 import it.prova.pokeronline.web.api.exception.UnouthorizedException;
 import it.prova.pokeronline.web.api.exception.UtenteNotFoundException;
@@ -30,42 +31,46 @@ public class UtenteController {
 	@Autowired
 	private UtenteService utenteService;
 
+	@Autowired
+	private RuoloService ruoloService;
+
 	@GetMapping
-	public List<Utente> getAll(@RequestHeader("authorization") String utenteRole) {
-		if (!utenteRole.equals("admin")) {
+	public List<Utente> getAll(@RequestHeader("authorization") String username) {
+
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
+
 		return utenteService.listAllElements();
 	}
 
 	@GetMapping("/{id}")
 	public Utente findById(@PathVariable(value = "id", required = true) long id,
-			@RequestHeader("authorization") String utenteRole) {
+			@RequestHeader("authorization") String username) {
 
-		if (!utenteRole.equals("admin")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (utenteInstance == null)
+			throw new UtenteNotFoundException("Utente not found con id: " + id);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		Utente utente = utenteService.caricaSingoloElemento(id);
-
-		if (utente == null)
-			throw new UtenteNotFoundException("Utente not found con id: " + id);
-
-		return utente;
+		return utenteInstance;
 	}
 
 	// gli errori di validazione vengono mostrati con 400 Bad Request ma
 	// elencandoli grazie al ControllerAdvice
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Utente createNew(@Valid @RequestBody Utente utenteInput, @RequestHeader("authorization") String utenteRole) {
+	public Utente createNew(@Valid @RequestBody Utente utenteInput, @RequestHeader("authorization") String username) {
 
-//		if(utenteInput.getRuoli() != null) {
-//			for(Ruolo ruoloInstance: utenteInput.getRuoli())
-//				utenteService.aggiungiRuolo(utenteInput, ruoloInstance);
-//			
-//		}
-		if (!utenteRole.equals("admin")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 		return utenteService.inserisciNuovo(utenteInput);
@@ -73,16 +78,16 @@ public class UtenteController {
 
 	@PutMapping("/{id}")
 	public Utente update(@Valid @RequestBody Utente utenteInput, @PathVariable(required = true) Long id,
-			@RequestHeader("authorization") String utenteRole) {
+			@RequestHeader("authorization") String username) {
 
-		if (!utenteRole.equals("admin")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (utenteInstance == null)
+			throw new UtenteNotFoundException("Utente not found con id: " + id);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
-
-		Utente utente = utenteService.caricaSingoloElemento(id);
-
-		if (utente == null)
-			throw new UtenteNotFoundException("Utente not found con id: " + id);
 
 		utenteInput.setId(id);
 		return utenteService.aggiorna(utenteInput);
@@ -90,27 +95,29 @@ public class UtenteController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public void delete(@PathVariable(required = true) Long id, @RequestHeader("authorization") String utenteRole) {
+	public void delete(@PathVariable(required = true) Long id, @RequestHeader("authorization") String username) {
 
-		if (!utenteRole.equals("admin")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (utenteInstance == null)
+			throw new UtenteNotFoundException("Utente not found con id: " + id);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		Utente utente = utenteService.caricaSingoloElemento(id);
-
-		if (utente == null)
-			throw new UtenteNotFoundException("Utente not found con id: " + id);
-
 		// utenteService.rimuovi(utente);
-		utente.setStato(StatoUtente.DISABILITATO);
-		utente.setId(id);
-		utenteService.aggiorna(utente);
+		utenteInstance.setStato(StatoUtente.DISABILITATO);
+		utenteInstance.setId(id);
+		utenteService.aggiorna(utenteInstance);
 	}
 
 	@PostMapping("/search")
-	public List<Utente> search(@RequestBody Utente example, @RequestHeader("authorization") String utenteRole) {
+	public List<Utente> search(@RequestBody Utente example, @RequestHeader("authorization") String username) {
 
-		if (!utenteRole.equals("admin")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
@@ -119,18 +126,20 @@ public class UtenteController {
 
 	@PutMapping("/credito/{id}")
 	public Utente caricaCredito(@RequestBody Double credito, @PathVariable(required = true) Long id,
-			@RequestHeader("authorization") String utenteRole) {
+			@RequestHeader("authorization") String username) {
 
-		if (!utenteRole.equals("admin")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (utenteInstance == null)
+			throw new UtenteNotFoundException("Utente not found con id: " + id);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		Utente utente = utenteService.caricaSingoloElemento(id);
+		Double creditoUtente = utenteInstance.getCredito();
 
-		if (utente == null)
-			throw new UtenteNotFoundException("Utente not found con id: " + id);
-
-		utente.setCredito(credito);
-		return utenteService.aggiorna(utente);
+		utenteInstance.setCredito(creditoUtente + credito);
+		return utenteService.aggiorna(utenteInstance);
 	}
 }

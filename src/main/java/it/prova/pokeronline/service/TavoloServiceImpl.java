@@ -44,6 +44,8 @@ public class TavoloServiceImpl implements TavoloService {
 		return repository.findByExample(example);
 	}
 
-//	@Override
-//	public void accediTavolo(Tavolo tavoloInstance)
+	@Override
+	public List<Tavolo> trovaTavoliByEsperienza(Double esperienza) {
+		return repository.findAllTavoloByEsperienza(esperienza);
+	}
 }

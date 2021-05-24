@@ -20,4 +20,6 @@ public interface UtenteService {
 	List<Utente> findByExample(Utente example);
 
 	void aggiungiRuolo(Utente utenteEsistente, Ruolo ruoloInstance);
+
+	Utente trovaByUsername(String username);
 }

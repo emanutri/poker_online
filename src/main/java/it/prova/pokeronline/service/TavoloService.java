@@ -17,4 +17,6 @@ public interface TavoloService {
 	void rimuovi(Tavolo tavoloInstance);
 
 	List<Tavolo> findByExample(Tavolo example);
+
+	List<Tavolo> trovaTavoliByEsperienza(Double esperienza);
 }

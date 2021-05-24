@@ -6,4 +6,5 @@ import it.prova.pokeronline.model.Utente;
 
 public interface UtenteRepository extends CrudRepository<Utente, Long>, CustomUtenteRepository {
 
+	Utente findByUsername(String username);
 }

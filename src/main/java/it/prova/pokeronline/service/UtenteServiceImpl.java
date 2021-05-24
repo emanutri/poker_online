@@ -47,8 +47,11 @@ public class UtenteServiceImpl implements UtenteService {
 
 	@Override
 	public void aggiungiRuolo(Utente utenteEsistente, Ruolo ruoloInstance) {
-		// ruoloRepository.findById(ruoloInstance.getId());
 		repository.aggiungiRuolo(utenteEsistente, ruoloInstance);
 	}
 
+	@Override
+	public Utente trovaByUsername(String username) {
+		return repository.findByUsername(username);
+	}
 }

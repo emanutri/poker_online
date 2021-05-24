@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.prova.pokeronline.model.Tavolo;
 import it.prova.pokeronline.model.Utente;
+import it.prova.pokeronline.service.RuoloService;
 import it.prova.pokeronline.service.TavoloService;
 import it.prova.pokeronline.service.UtenteService;
 import it.prova.pokeronline.web.api.exception.NoCreditException;
@@ -29,90 +30,110 @@ public class PlayerController {
 	@Autowired
 	private UtenteService utenteService;
 
+	@Autowired
+	private RuoloService ruoloService;
+
 	// utente acquista per se stesso, non per gli altri
 	// non passo id in url, (ma nell'header), per avere una delle possibili
 	// gestioni differente dalle altre:
 	// {id}/*@PathVariable(required = true) Long id,*/
 	@PutMapping("/acquista")
-	public Utente compraCredito(@RequestBody Double credito, @RequestHeader("authorization") String utenteRole,
-			@RequestHeader("utenteId") String utenteId) {
+	public Utente compraCredito(@RequestBody Double credito,
+			@RequestHeader("authorization") String username/*
+															 * ,
+															 * 
+															 * @RequestHeader("utenteId") String utenteId
+															 */) {
 
-		if (!utenteRole.equals("admin") && !utenteRole.equals("special player")
-				&& !utenteRole.equals("simple player")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (utenteInstance == null)
+			throw new UtenteNotFoundException("Utente not found con id: " + utenteInstance);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
+//		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
 
-		if (utente == null)
-			throw new UtenteNotFoundException("Utente not found con id: " + Long.parseLong(utenteId));
+		Double creditoUtente = utenteInstance.getCredito();
 
-		utente.setCredito(credito);
-		return utenteService.aggiorna(utente);
+		utenteInstance.setCredito(creditoUtente + credito);
+		return utenteService.aggiorna(utenteInstance);
 	}
 
 	@PostMapping("/last")
-	public List<Tavolo> lastGame(@RequestHeader("authorization") String utenteRole,
-			@RequestHeader("utenteId") String utenteId) {
+	public List<Tavolo> lastGame(
+			@RequestHeader("authorization") String username/*
+															 * ,
+															 * 
+															 * @RequestHeader("utenteId") String utenteId
+															 */) {
 
-		if (!utenteRole.equals("admin") && !utenteRole.equals("special player")
-				&& !utenteRole.equals("simple player")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
-		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
+
+//		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
 
 		Tavolo tavoloExample = new Tavolo();
-		tavoloExample.getUtenti().add(utente);
+		tavoloExample.getUtenti().add(utenteInstance);
 
 		return tavoloService.findByExample(tavoloExample);
 	}
 
 	@PostMapping("/search")
-	public List<Tavolo> ricercaTavolo(@RequestHeader("authorization") String utenteRole,
-			@RequestHeader("utenteId") String utenteId) {
+	public List<Tavolo> ricercaTavolo(@RequestHeader("authorization") String username) {
 
-		if (!utenteRole.equals("admin") && !utenteRole.equals("special player")
-				&& !utenteRole.equals("simple player")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
 		// cerco tavolo per esperienza
-		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
-		Double esperienza = utente.getEsperienzaAccumulata();
-		Tavolo tavoloExample = new Tavolo();
-		tavoloExample.setEsperienzaMin(esperienza);
+//		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
+		Double esperienza = utenteInstance.getEsperienzaAccumulata();
 
-//		System.out.println(tavoloExample+"AAAAAAAAAAAAAAAAAAAA"+tavoloService.findByExample(tavoloExample));
-
-		return tavoloService.findByExample(tavoloExample);
+		return tavoloService.trovaTavoliByEsperienza(esperienza);
 	}
 
 	@PostMapping("/unisciti/{id}")
 	public String uniscitiTavolo(@PathVariable(required = true) Long id,
-			@RequestHeader("authorization") String utenteRole, @RequestHeader("utenteId") String utenteId) {
+			@RequestHeader("authorization") String username) {
 
 		String messaggio;
 
-		if (!utenteRole.equals("admin") && !utenteRole.equals("special player")
-				&& !utenteRole.equals("simple player")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
 		Tavolo tavolo = tavoloService.caricaSingoloElemento(id);
 
-		if (utente.getCredito() < tavolo.getCifraMinima()) {
+		if (utenteInstance.getCredito() < tavolo.getCifraMinima()) {
 			throw new NoCreditException(
 					"Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica");
 		}
-		if (utente.getEsperienzaAccumulata() < tavolo.getEsperienzaMin()) {
+		if (utenteInstance.getEsperienzaAccumulata() < tavolo.getEsperienzaMin()) {
 			throw new UnouthorizedException("Non hai sufficiente esperienza per giocare a questo tavolo");
 		}
 
-		if (!tavolo.getUtenti().contains(utente)) {
+		if (!tavolo.getUtenti().contains(utenteInstance)) {
 
-			utente.setTavolo(tavolo);
-			utenteService.aggiorna(utente);
+			utenteInstance.setTavolo(tavolo);
+			utenteService.aggiorna(utenteInstance);
 
 			messaggio = "Sei entrato con successo al tavolo: " + tavolo.getDenominazione();
 			return messaggio;
@@ -125,20 +146,21 @@ public class PlayerController {
 
 	@PostMapping("/gioca/{id}")
 	public String giocaPartita(@PathVariable(required = true) Long id,
-			@RequestHeader("authorization") String utenteRole, @RequestHeader("utenteId") String utenteId) {
+			@RequestHeader("authorization") String username) {
 
 		String messaggio;
 
-		if (!utenteRole.equals("admin") && !utenteRole.equals("special player")
-				&& !utenteRole.equals("simple player")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
-
 		Tavolo tavolo = tavoloService.caricaSingoloElemento(id);
 
-		if (!tavolo.getUtenti().contains(utente)) {
+		if (!tavolo.getUtenti().contains(utenteInstance)) {
 			messaggio = "Attenzione!! Prima di giocare è necessario unirsi al tavolo";
 			return messaggio;
 		}
@@ -155,23 +177,23 @@ public class PlayerController {
 		Double tot = segno * somma;
 
 		// modifico il credito e salvo il credito residuo utente
-		Double credito = utente.getCredito();
+		Double credito = utenteInstance.getCredito();
 		credito = credito + tot;
-		utente.setCredito(credito);
-		utenteService.aggiorna(utente);
+		utenteInstance.setCredito(credito);
+		utenteService.aggiorna(utenteInstance);
 
 		// se ha perso
 		if (tot <= 0) {
 
-			if (utente.getCredito() < tavolo.getCifraMinima()) {
+			if (utenteInstance.getCredito() < tavolo.getCifraMinima()) {
 				// se l'utente ha superato il credito minimo
 				// lo mando via dal tavolo
-				tavolo.getUtenti().remove(utente);
+				tavolo.getUtenti().remove(utenteInstance);
 				tavoloService.aggiorna(tavolo);
 
 				// aggiorno l'esperienza
-				utente.setEsperienzaAccumulata(utente.getEsperienzaAccumulata() + 1);
-				utenteService.aggiorna(utente);
+				utenteInstance.setEsperienzaAccumulata(utenteInstance.getEsperienzaAccumulata() + 1);
+				utenteService.aggiorna(utenteInstance);
 
 				messaggio = "Hai perso: " + tot
 						+ " Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica";
@@ -188,21 +210,22 @@ public class PlayerController {
 
 	@PostMapping("/abbandona/{id}")
 	public String abbandonaPartita(@PathVariable(required = true) Long id,
-			@RequestHeader("authorization") String utenteRole, @RequestHeader("utenteId") String utenteId) {
+			@RequestHeader("authorization") String username) {
 
-		if (!utenteRole.equals("admin") && !utenteRole.equals("special player")
-				&& !utenteRole.equals("simple player")) {
+		Utente utenteInstance = utenteService.trovaByUsername(username);
+
+		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		Utente utente = utenteService.caricaSingoloElemento(Long.parseLong(utenteId));
-
 		// disaccoppio tavolo da utente
-		utente.setTavolo(null);
+		utenteInstance.setTavolo(null);
 
 		// aggiorno l'esperienza
-		utente.setEsperienzaAccumulata(utente.getEsperienzaAccumulata() + 1);
-		utenteService.aggiorna(utente);
+		utenteInstance.setEsperienzaAccumulata(utenteInstance.getEsperienzaAccumulata() + 1);
+		utenteService.aggiorna(utenteInstance);
 
 		String messaggio = "Uscita dal tavolo avvenuta con successo";
 
