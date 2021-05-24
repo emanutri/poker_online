@@ -3,6 +3,7 @@ package it.prova.pokeronline.web.api;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +37,7 @@ public class PlayerController {
 
 	// utente acquista per se stesso, non per gli altri
 	@PutMapping("/acquista")
-	public Utente compraCredito(@RequestBody Double credito, @RequestHeader("authorization") String username) {
+	public ResponseEntity<Utente> compraCredito(@RequestBody Double credito, @RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -52,11 +53,11 @@ public class PlayerController {
 		Double creditoUtente = utenteInstance.getCredito();
 
 		utenteInstance.setCredito(creditoUtente + credito);
-		return utenteService.aggiorna(utenteInstance);
+		return ResponseEntity.ok().body(utenteService.aggiorna(utenteInstance));
 	}
 
 	@GetMapping("/last")
-	public List<Tavolo> lastGame(@RequestHeader("authorization") String username) {
+	public ResponseEntity<List<Tavolo>> lastGame(@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -69,11 +70,11 @@ public class PlayerController {
 		Tavolo tavoloExample = new Tavolo();
 		tavoloExample.getUtenti().add(utenteInstance);
 
-		return tavoloService.findByExample(tavoloExample);
+		return ResponseEntity.ok().body(tavoloService.findByExample(tavoloExample));
 	}
 
 	@GetMapping("/search")
-	public List<Tavolo> ricercaTavolo(@RequestHeader("authorization") String username) {
+	public ResponseEntity<List<Tavolo>> ricercaTavolo(@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -86,11 +87,11 @@ public class PlayerController {
 		// cerco tavolo per esperienza
 		Double esperienza = utenteInstance.getEsperienzaAccumulata();
 
-		return tavoloService.trovaTavoliByEsperienza(esperienza);
+		return ResponseEntity.ok().body(tavoloService.trovaTavoliByEsperienza(esperienza));
 	}
 
 	@PostMapping("/unisciti/{id}")
-	public String uniscitiTavolo(@PathVariable(required = true) Long id,
+	public ResponseEntity<String> uniscitiTavolo(@PathVariable(required = true) Long id,
 			@RequestHeader("authorization") String username) {
 
 		String messaggio;
@@ -119,16 +120,16 @@ public class PlayerController {
 			utenteService.aggiorna(utenteInstance);
 
 			messaggio = "Sei entrato con successo al tavolo: " + tavolo.getDenominazione();
-			return messaggio;
+			return ResponseEntity.ok().body(messaggio);
 		} else {
 			messaggio = "Sei già unito a questo tavolo: " + tavolo.getDenominazione();
-			return messaggio;
+			return ResponseEntity.badRequest().body(messaggio);
 		}
 
 	}
 
 	@PostMapping("/gioca/{id}")
-	public String giocaPartita(@PathVariable(required = true) Long id,
+	public ResponseEntity<String> giocaPartita(@PathVariable(required = true) Long id,
 			@RequestHeader("authorization") String username) {
 
 		String messaggio;
@@ -145,12 +146,12 @@ public class PlayerController {
 
 		if (!tavolo.getUtenti().contains(utenteInstance)) {
 			messaggio = "Attenzione!! Prima di giocare è necessario unirsi al tavolo";
-			return messaggio;
+			return ResponseEntity.badRequest().body(messaggio);
 		}
-		
+
 		if (utenteInstance.getCredito() < tavolo.getCifraMinima()) {
 			messaggio = "Attenzione!! Non hai sufficiente credito per giocare a questo tavolo, per favore, ricarica.";
-			return messaggio;
+			return ResponseEntity.badRequest().body(messaggio);
 		}
 
 		// gioca
@@ -193,11 +194,11 @@ public class PlayerController {
 			// se ha vinto
 			messaggio = "Complimenti! Hai vinto:" + tot + " Non dimenticare di dare la mancia al croupier!";
 		}
-		return messaggio;
+		return ResponseEntity.ok().body(messaggio);
 	}
 
-	@PostMapping("/abbandona/{id}")
-	public String abbandonaPartita(@PathVariable(required = true) Long id,
+	@PutMapping("/abbandona/{id}")
+	public ResponseEntity<String> abbandonaPartita(@PathVariable(required = true) Long id,
 			@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
@@ -217,7 +218,7 @@ public class PlayerController {
 
 		String messaggio = "Uscita dal tavolo avvenuta con successo";
 
-		return messaggio;
+		return  ResponseEntity.ok().body(messaggio);
 
 	}
 }

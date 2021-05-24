@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,7 +40,7 @@ public class TavoloController {
 	private RuoloService ruoloService;
 
 	@GetMapping
-	public List<Tavolo> getAll(@RequestHeader("authorization") String username) {
+	public ResponseEntity<List<Tavolo>> getAll(@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -47,11 +48,11 @@ public class TavoloController {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		return tavoloService.listAllElements();
+		return ResponseEntity.ok().body(tavoloService.listAllElements());
 	}
 
 	@GetMapping("/{id}")
-	public Tavolo findById(@PathVariable(value = "id", required = true) long id,
+	public ResponseEntity<Tavolo> findById(@PathVariable(value = "id", required = true) long id,
 			@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
@@ -66,12 +67,12 @@ public class TavoloController {
 		if (tavolo == null)
 			throw new TavoloNotFoundException("Tavolo not found con id: " + id);
 
-		return tavolo;
+		return ResponseEntity.ok().body(tavolo);
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Tavolo createNew(@Valid @RequestBody Tavolo tavoloInput, @RequestHeader("authorization") String username) {
+	public ResponseEntity<Tavolo> createNew(@Valid @RequestBody Tavolo tavoloInput, @RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -80,11 +81,11 @@ public class TavoloController {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		return tavoloService.inserisciNuovo(tavoloInput);
+		return ResponseEntity.ok().body(tavoloService.inserisciNuovo(tavoloInput));
 	}
 
 	@PutMapping("/{id}")
-	public Tavolo update(@Valid @RequestBody Tavolo tavoloInput, @PathVariable(required = true) Long id,
+	public ResponseEntity<Tavolo> update(@Valid @RequestBody Tavolo tavoloInput, @PathVariable(required = true) Long id,
 			@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
@@ -104,7 +105,8 @@ public class TavoloController {
 			throw new UnouthorizedException("Impossibile modificare, il tavolo è ancora pieno");
 
 		tavoloInput.setId(id);
-		return tavoloService.aggiorna(tavoloInput);
+		
+		return ResponseEntity.ok().body(tavoloService.aggiorna(tavoloInput));
 	}
 
 	@DeleteMapping("/{id}")
@@ -131,7 +133,7 @@ public class TavoloController {
 	}
 
 	@PostMapping("/search")
-	public List<Tavolo> search(@RequestBody Tavolo example, @RequestHeader("authorization") String username) {
+	public ResponseEntity<List<Tavolo>> search(@RequestBody Tavolo example, @RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -140,7 +142,7 @@ public class TavoloController {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		return tavoloService.findByExample(example);
+		return ResponseEntity.ok().body(tavoloService.findByExample(example));
 	}
 
 }

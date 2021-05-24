@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +36,7 @@ public class UtenteController {
 	private RuoloService ruoloService;
 
 	@GetMapping
-	public List<Utente> getAll(@RequestHeader("authorization") String username) {
+	public ResponseEntity<List<Utente>> getAll(@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -43,11 +44,11 @@ public class UtenteController {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		return utenteService.listAllElements();
+		return ResponseEntity.ok().body(utenteService.listAllElements());
 	}
 
 	@GetMapping("/{id}")
-	public Utente findById(@PathVariable(value = "id", required = true) long id,
+	public ResponseEntity<Utente> findById(@PathVariable(value = "id", required = true) long id,
 			@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
@@ -59,25 +60,26 @@ public class UtenteController {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		return utenteInstance;
+		return ResponseEntity.ok().body(utenteInstance);
 	}
 
 	// gli errori di validazione vengono mostrati con 400 Bad Request ma
 	// elencandoli grazie al ControllerAdvice
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Utente createNew(@Valid @RequestBody Utente utenteInput, @RequestHeader("authorization") String username) {
+	public ResponseEntity<Utente> createNew(@Valid @RequestBody Utente utenteInput,
+			@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
 		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
-		return utenteService.inserisciNuovo(utenteInput);
+		return ResponseEntity.ok().body(utenteService.inserisciNuovo(utenteInput));
 	}
 
 	@PutMapping("/{id}")
-	public Utente update(@Valid @RequestBody Utente utenteInput, @PathVariable(required = true) Long id,
+	public ResponseEntity<Utente> update(@Valid @RequestBody Utente utenteInput, @PathVariable(required = true) Long id,
 			@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
@@ -90,7 +92,8 @@ public class UtenteController {
 		}
 
 		utenteInput.setId(id);
-		return utenteService.aggiorna(utenteInput);
+
+		return ResponseEntity.ok().body(utenteService.aggiorna(utenteInput));
 	}
 
 	@DeleteMapping("/{id}")
@@ -112,7 +115,8 @@ public class UtenteController {
 	}
 
 	@PostMapping("/search")
-	public List<Utente> search(@RequestBody Utente example, @RequestHeader("authorization") String username) {
+	public ResponseEntity<List<Utente>> search(@RequestBody Utente example,
+			@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
 
@@ -120,11 +124,11 @@ public class UtenteController {
 			throw new UnouthorizedException("Utente non autorizzato");
 		}
 
-		return utenteService.findByExample(example);
+		return ResponseEntity.ok().body(utenteService.findByExample(example));
 	}
 
 	@PutMapping("/credito/{id}")
-	public Utente caricaCredito(@RequestBody Double credito, @PathVariable(required = true) Long id,
+	public ResponseEntity<Utente> caricaCredito(@RequestBody Double credito, @PathVariable(required = true) Long id,
 			@RequestHeader("authorization") String username) {
 
 		Utente utenteInstance = utenteService.trovaByUsername(username);
@@ -139,6 +143,7 @@ public class UtenteController {
 		Double creditoUtente = utenteInstance.getCredito();
 
 		utenteInstance.setCredito(creditoUtente + credito);
-		return utenteService.aggiorna(utenteInstance);
+
+		return ResponseEntity.ok().body(utenteService.aggiorna(utenteInstance));
 	}
 }

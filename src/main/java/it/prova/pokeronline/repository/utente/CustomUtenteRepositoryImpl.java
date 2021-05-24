@@ -36,7 +36,7 @@ public class CustomUtenteRepositoryImpl implements CustomUtenteRepository {
 		List<String> whereClauses = new ArrayList<String>();
 
 		StringBuilder queryBuilder = new StringBuilder(
-				"select u from Utente left join fetch u.tavolo t left join fetch u.ruoli r where 1 = 1 ");
+				"select u from Utente u left join fetch u.tavolo t left join fetch u.ruoli r where 1 = 1 ");
 
 		if (StringUtils.isNotEmpty(example.getNome())) {
 			whereClauses.add(" u.nome like :nome ");
@@ -66,8 +66,8 @@ public class CustomUtenteRepositoryImpl implements CustomUtenteRepository {
 			whereClauses.add("u.credito >= :credito ");
 			paramaterMap.put("credito", example.getCredito());
 		}
-		if (example.getRuoli() != null) {
-			whereClauses.add(" r =:ruoli ");
+		if (example.getRuoli() != null && !example.getRuoli().isEmpty()) {
+			whereClauses.add(" r in :ruoli ");
 			paramaterMap.put("ruoli", example.getRuoli());
 		}
 		if (example.getTavolo() != null) {
