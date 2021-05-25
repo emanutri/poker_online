@@ -14,8 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.prova.pokeronline.model.Tavolo;
-import it.prova.pokeronline.model.Utente;
-import it.prova.pokeronline.service.RuoloService;
+import it.prova.pokeronline.model.User;
 import it.prova.pokeronline.service.TavoloService;
 import it.prova.pokeronline.service.UtenteService;
 import it.prova.pokeronline.web.api.exception.NoCreditException;
@@ -32,23 +31,23 @@ public class PlayerController {
 	@Autowired
 	private UtenteService utenteService;
 
-	@Autowired
-	private RuoloService ruoloService;
+//	@Autowired
+//	private RuoloService ruoloService;
 
 	// utente acquista per se stesso, non per gli altri
 	@PutMapping("/acquista")
-	public ResponseEntity<Utente> compraCredito(@RequestBody Double credito, @RequestHeader("authorization") String username) {
+	public ResponseEntity<User> compraCredito(@RequestBody Double credito, @RequestHeader("authorization") String username) {
 
-		Utente utenteInstance = utenteService.trovaByUsername(username);
+		User utenteInstance = utenteService.trovaByUsername(username);
 
 		if (utenteInstance == null)
 			throw new UtenteNotFoundException("Utente not found con id: " + utenteInstance);
 
-		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
-			throw new UnouthorizedException("Utente non autorizzato");
-		}
+//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
+//			throw new UnouthorizedException("Utente non autorizzato");
+//		}
 
 		Double creditoUtente = utenteInstance.getCredito();
 
@@ -59,13 +58,13 @@ public class PlayerController {
 	@GetMapping("/last")
 	public ResponseEntity<List<Tavolo>> lastGame(@RequestHeader("authorization") String username) {
 
-		Utente utenteInstance = utenteService.trovaByUsername(username);
+		User utenteInstance = utenteService.trovaByUsername(username);
 
-		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
-			throw new UnouthorizedException("Utente non autorizzato");
-		}
+//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
+//			throw new UnouthorizedException("Utente non autorizzato");
+//		}
 
 		Tavolo tavoloExample = new Tavolo();
 		tavoloExample.getUtenti().add(utenteInstance);
@@ -76,13 +75,13 @@ public class PlayerController {
 	@GetMapping("/search")
 	public ResponseEntity<List<Tavolo>> ricercaTavolo(@RequestHeader("authorization") String username) {
 
-		Utente utenteInstance = utenteService.trovaByUsername(username);
+		User utenteInstance = utenteService.trovaByUsername(username);
 
-		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
-			throw new UnouthorizedException("Utente non autorizzato");
-		}
+//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
+//			throw new UnouthorizedException("Utente non autorizzato");
+//		}
 
 		// cerco tavolo per esperienza
 		Double esperienza = utenteInstance.getEsperienzaAccumulata();
@@ -96,13 +95,13 @@ public class PlayerController {
 
 		String messaggio;
 
-		Utente utenteInstance = utenteService.trovaByUsername(username);
+		User utenteInstance = utenteService.trovaByUsername(username);
 
-		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
-			throw new UnouthorizedException("Utente non autorizzato");
-		}
+//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
+//			throw new UnouthorizedException("Utente non autorizzato");
+//		}
 
 		Tavolo tavolo = tavoloService.caricaSingoloElemento(id);
 
@@ -134,13 +133,13 @@ public class PlayerController {
 
 		String messaggio;
 
-		Utente utenteInstance = utenteService.trovaByUsername(username);
+		User utenteInstance = utenteService.trovaByUsername(username);
 
-		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
-			throw new UnouthorizedException("Utente non autorizzato");
-		}
+//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
+//			throw new UnouthorizedException("Utente non autorizzato");
+//		}
 
 		Tavolo tavolo = tavoloService.caricaSingoloElemento(id);
 
@@ -201,13 +200,13 @@ public class PlayerController {
 	public ResponseEntity<String> abbandonaPartita(@PathVariable(required = true) Long id,
 			@RequestHeader("authorization") String username) {
 
-		Utente utenteInstance = utenteService.trovaByUsername(username);
+		User utenteInstance = utenteService.trovaByUsername(username);
 
-		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
-				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
-			throw new UnouthorizedException("Utente non autorizzato");
-		}
+//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(2L))
+//				&& !utenteInstance.getRuoli().contains(ruoloService.findById(3L))) {
+//			throw new UnouthorizedException("Utente non autorizzato");
+//		}
 
 		// disaccoppio tavolo da utente
 		utenteInstance.setTavolo(null);

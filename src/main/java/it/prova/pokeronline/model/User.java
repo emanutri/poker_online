@@ -1,13 +1,10 @@
 package it.prova.pokeronline.model;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,17 +16,22 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serializable;
 
-@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+//@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@Table(name = "utente")
-public class Utente {
+@Table(name = "user")
+public class User implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,14 +53,22 @@ public class Utente {
 	@NotBlank(message = "{password.notblank}")
 	@Column(name = "password")
 	private String password;
+	
+	@NotBlank(message = "{email.notblank}")
+	@Column(name = "email")
+	private String email;
 
 	@NotNull(message = "{dataRegistrazione.notnull}")
 	@Column(name = "data_registrazione")
 	private Date dataRegistrazione;
 
-	@NotNull(message = "{stato.notnull}")
-	@Enumerated(EnumType.STRING)
-	private StatoUtente stato = StatoUtente.ATTIVO;
+//	@NotNull(message = "{stato.notnull}")
+//	@Enumerated(EnumType.STRING)
+//	private StatoUtente stato = StatoUtente.ATTIVO;
+	
+	@Column(name = "enabled")
+	@NotNull
+	private Boolean enabled;
 
 	@NotNull(message = "{esperienzaAccumulata.notnull}")
 	@DecimalMin("0.0")
@@ -70,20 +80,26 @@ public class Utente {
 	@Column(name = "credito")
 	private Double credito;
 
-	@NotEmpty(message = "{ruoli.notempty}")
-	@ManyToMany
-	@JoinTable(name = "utente_ruolo", joinColumns = @JoinColumn(name = "utente_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "ruolo_id", referencedColumnName = "id"))
-	private Set<Ruolo> ruoli = new HashSet<>(0);
+//	@NotEmpty(message = "{ruoli.notempty}")
+//	@ManyToMany
+//	@JoinTable(name = "utente_ruolo", joinColumns = @JoinColumn(name = "utente_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "ruolo_id", referencedColumnName = "id"))
+//	private Set<Ruolo> ruoli = new HashSet<>(0);
 
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "users_authorities", joinColumns = {
+			@JoinColumn(name = "user_username", referencedColumnName = "username") }, inverseJoinColumns = {
+					@JoinColumn(name = "authority_id", referencedColumnName = "id") })
+	private List<Authority> authorities;
+	
 	@JsonIgnoreProperties(value = { "utenti", "utenteCreazione" })
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tavolo_id")
 	private Tavolo tavolo;
 
-	public Utente() {
+	public User() {
 	}
 
-	public Utente(String nome, String cognome, String username, String password, Date dataRegistrazione,
+	public User(String nome, String cognome, String username, String password, Date dataRegistrazione,
 			Double esperienzaAccumulata, Double credito) {
 		this.nome = nome;
 		this.cognome = cognome;
@@ -94,18 +110,18 @@ public class Utente {
 		this.credito = credito;
 	}
 
-	public Utente(Long id, String nome, String cognome, String username, String password, Date dataRegistrazione,
-			StatoUtente stato, Double esperienzaAccumulata, Double credito, Set<Ruolo> ruoli, Tavolo tavolo) {
+	public User(Long id, String nome, String cognome, String username, String password, Date dataRegistrazione,
+			Boolean enabled, Double esperienzaAccumulata, Double credito, List<Authority> authorities, Tavolo tavolo) {
 		this.id = id;
 		this.nome = nome;
 		this.cognome = cognome;
 		this.username = username;
 		this.password = password;
 		this.dataRegistrazione = dataRegistrazione;
-		this.stato = stato;
+		this.enabled = enabled;
 		this.esperienzaAccumulata = esperienzaAccumulata;
 		this.credito = credito;
-		this.ruoli = ruoli;
+		this.authorities = authorities;
 		this.tavolo = tavolo;
 	}
 
@@ -157,13 +173,13 @@ public class Utente {
 		this.dataRegistrazione = dataRegistrazione;
 	}
 
-	public StatoUtente getStato() {
-		return stato;
-	}
-
-	public void setStato(StatoUtente stato) {
-		this.stato = stato;
-	}
+//	public StatoUtente getStato() {
+//		return stato;
+//	}
+//
+//	public void setStato(StatoUtente stato) {
+//		this.stato = stato;
+//	}
 
 	public Double getEsperienzaAccumulata() {
 		return esperienzaAccumulata;
@@ -181,13 +197,13 @@ public class Utente {
 		this.credito = credito;
 	}
 
-	public Set<Ruolo> getRuoli() {
-		return ruoli;
-	}
-
-	public void setRuoli(Set<Ruolo> ruoli) {
-		this.ruoli = ruoli;
-	}
+//	public Set<Ruolo> getRuoli() {
+//		return ruoli;
+//	}
+//
+//	public void setRuoli(Set<Ruolo> ruoli) {
+//		this.ruoli = ruoli;
+//	}
 
 	public Tavolo getTavolo() {
 		return tavolo;
@@ -197,10 +213,35 @@ public class Utente {
 		this.tavolo = tavolo;
 	}
 
+	
 	@Override
 	public String toString() {
-		return "Utente [id=" + id + ", username=" + username + ", esperienzaAccumulata=" + esperienzaAccumulata
+		return "User: [id=" + id + ", username=" + username + ", esperienzaAccumulata=" + esperienzaAccumulata
 				+ ", credito=" + credito + "]";
+	}
+
+	public Boolean getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public List<Authority> getAuthorities() {
+		return authorities;
+	}
+
+	public void setAuthorities(List<Authority> authorities) {
+		this.authorities = authorities;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 }

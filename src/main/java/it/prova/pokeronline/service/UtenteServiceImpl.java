@@ -5,53 +5,53 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.prova.pokeronline.model.Ruolo;
-import it.prova.pokeronline.model.Utente;
-import it.prova.pokeronline.repository.utente.UtenteRepository;
+import it.prova.pokeronline.model.Authority;
+import it.prova.pokeronline.model.User;
+import it.prova.pokeronline.security.repository.UserRepository;
 
 @Service
 public class UtenteServiceImpl implements UtenteService {
 
 	@Autowired
-	private UtenteRepository repository;
+	private UserRepository repository;
 
 	@Override
-	public List<Utente> listAllElements() {
-		return (List<Utente>) repository.findAll();
+	public List<User> listAllElements() {
+		return (List<User>) repository.findAll();
 	}
 
 	@Override
-	public Utente caricaSingoloElemento(Long id) {
+	public User caricaSingoloElemento(Long id) {
 		return repository.findById(id).orElse(null);
 	}
 
 	@Override
-	public Utente aggiorna(Utente utenteInstance) {
+	public User aggiorna(User utenteInstance) {
 		return repository.save(utenteInstance);
 	}
 
 	@Override
-	public Utente inserisciNuovo(Utente utenteInstance) {
+	public User inserisciNuovo(User utenteInstance) {
 		return repository.save(utenteInstance);
 	}
 
 	@Override
-	public void rimuovi(Utente utenteInstance) {
+	public void rimuovi(User utenteInstance) {
 		repository.delete(utenteInstance);
 	}
 
 	@Override
-	public List<Utente> findByExample(Utente example) {
+	public List<User> findByExample(User example) {
 		return repository.findByExample(example);
 	}
 
 	@Override
-	public void aggiungiRuolo(Utente utenteEsistente, Ruolo ruoloInstance) {
+	public void aggiungiRuolo(User utenteEsistente, Authority ruoloInstance) {
 		repository.aggiungiRuolo(utenteEsistente, ruoloInstance);
 	}
 
 	@Override
-	public Utente trovaByUsername(String username) {
-		return repository.findByUsername(username);
+	public User trovaByUsername(String username) {
+		return repository.findByUsername(username).orElse(null);
 	}
 }

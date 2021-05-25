@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+//@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "tavolo")
@@ -52,19 +52,19 @@ public class Tavolo {
 
 	@JsonIgnoreProperties(value = { "tavolo" })
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tavolo")
-	private Set<Utente> utenti = new HashSet<>(0);
+	private Set<User> utenti = new HashSet<>(0);
 
 	@JsonIgnoreProperties(value = { "tavolo" })
 	@NotNull(message = "{utenteCreazione.notnull}")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "utente_creazione")
-	private Utente utenteCreazione;
+	private User utenteCreazione;
 
 	public Tavolo() {
 	}
 
 	public Tavolo(Double esperienzaMin, Double cifraMinima, String denominazione, Date dataCreazione,
-			Utente utenteCreazione) {
+			User utenteCreazione) {
 		this.esperienzaMin = esperienzaMin;
 		this.cifraMinima = cifraMinima;
 		this.denominazione = denominazione;
@@ -73,7 +73,7 @@ public class Tavolo {
 	}
 
 	public Tavolo(Long id, Double esperienzaMin, Double cifraMinima, String denominazione, Date dataCreazione,
-			Set<Utente> utenti, Utente utenteCreazione) {
+			Set<User> utenti, User utenteCreazione) {
 		this.id = id;
 		this.esperienzaMin = esperienzaMin;
 		this.cifraMinima = cifraMinima;
@@ -123,19 +123,19 @@ public class Tavolo {
 		this.dataCreazione = dataCreazione;
 	}
 
-	public Set<Utente> getUtenti() {
+	public Set<User> getUtenti() {
 		return utenti;
 	}
 
-	public void setUtenti(Set<Utente> utenti) {
+	public void setUtenti(Set<User> utenti) {
 		this.utenti = utenti;
 	}
 
-	public Utente getUtenteCreazione() {
+	public User getUtenteCreazione() {
 		return utenteCreazione;
 	}
 
-	public void setUtenteCreazione(Utente utenteCreazione) {
+	public void setUtenteCreazione(User utenteCreazione) {
 		this.utenteCreazione = utenteCreazione;
 	}
 

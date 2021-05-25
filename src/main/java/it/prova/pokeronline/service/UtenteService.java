@@ -2,24 +2,24 @@ package it.prova.pokeronline.service;
 
 import java.util.List;
 
-import it.prova.pokeronline.model.Ruolo;
-import it.prova.pokeronline.model.Utente;
+import it.prova.pokeronline.model.Authority;
+import it.prova.pokeronline.model.User;
 
 public interface UtenteService {
 
-	List<Utente> listAllElements();
+	List<User> listAllElements();
 
-	Utente caricaSingoloElemento(Long id);
+	User caricaSingoloElemento(Long id);
 
-	Utente aggiorna(Utente utenteInstance);
+	User aggiorna(User utenteInstance);
 
-	Utente inserisciNuovo(Utente utenteInstance);
+	User inserisciNuovo(User utenteInstance);
 
-	void rimuovi(Utente utenteInstance);
+	void rimuovi(User utenteInstance);
 
-	List<Utente> findByExample(Utente example);
+	List<User> findByExample(User example);
 
-	void aggiungiRuolo(Utente utenteEsistente, Ruolo ruoloInstance);
+	void aggiungiRuolo(User utenteEsistente, Authority ruoloInstance);
 
-	Utente trovaByUsername(String username);
+	User trovaByUsername(String username);
 }

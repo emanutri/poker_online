@@ -4,9 +4,9 @@ import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 
-import it.prova.pokeronline.model.Ruolo;
+import it.prova.pokeronline.model.Authority;
 
-public interface RuoloRepository extends CrudRepository<Ruolo, Long> {
+public interface RuoloRepository extends CrudRepository<Authority, Long> {
 
-	Optional<Ruolo> findById(Long id);
+	Optional<Authority> findById(Long id);
 }

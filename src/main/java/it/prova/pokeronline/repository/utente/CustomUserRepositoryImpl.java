@@ -12,31 +12,31 @@ import javax.persistence.TypedQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import it.prova.pokeronline.model.Ruolo;
-import it.prova.pokeronline.model.Utente;
+import it.prova.pokeronline.model.Authority;
+import it.prova.pokeronline.model.User;
 
-public class CustomUtenteRepositoryImpl implements CustomUtenteRepository {
+public class CustomUserRepositoryImpl implements CustomUserRepository {
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
 	@Transactional
-	public void aggiungiRuolo(Utente utenteEsistente, Ruolo ruoloInstance) {
+	public void aggiungiRuolo(User utenteEsistente, Authority ruoloInstance) {
 		
 		//ruoloInstance = entityManager.merge(ruoloInstance);
 		//utenteEsistente = entityManager.merge(utenteEsistente);
 		
 
-		utenteEsistente.getRuoli().add(ruoloInstance);
+		utenteEsistente.getAuthorities().add(ruoloInstance);
 	}
 	
 	@Override
-	public List<Utente> findByExample(Utente example) {
+	public List<User> findByExample(User example) {
 		Map<String, Object> paramaterMap = new HashMap<String, Object>();
 		List<String> whereClauses = new ArrayList<String>();
 
 		StringBuilder queryBuilder = new StringBuilder(
-				"select u from Utente u left join fetch u.tavolo t left join fetch u.ruoli r where 1 = 1 ");
+				"select u from User u left join fetch u.tavolo t left join fetch u.authorities a where 1 = 1 ");
 
 		if (StringUtils.isNotEmpty(example.getNome())) {
 			whereClauses.add(" u.nome like :nome ");
@@ -54,9 +54,9 @@ public class CustomUtenteRepositoryImpl implements CustomUtenteRepository {
 			whereClauses.add(" u.dataRegistrazione  >= :dataRegistrazione ");
 			paramaterMap.put("esperienzaMin", example.getDataRegistrazione());
 		}
-		if (example.getStato() != null) {
-			whereClauses.add(" u.stato  >= :stato ");
-			paramaterMap.put("cifraMinima", example.getStato());
+		if (example.getEnabled() != null) {
+			whereClauses.add(" u.enabled  >= :enabled ");
+			paramaterMap.put("enabled", example.getEnabled());
 		}
 		if (example.getEsperienzaAccumulata() != null) {
 			whereClauses.add("u.esperienzaAccumulata >= :esperienzaAccumulata ");
@@ -66,9 +66,9 @@ public class CustomUtenteRepositoryImpl implements CustomUtenteRepository {
 			whereClauses.add("u.credito >= :credito ");
 			paramaterMap.put("credito", example.getCredito());
 		}
-		if (example.getRuoli() != null && !example.getRuoli().isEmpty()) {
-			whereClauses.add(" r in :ruoli ");
-			paramaterMap.put("ruoli", example.getRuoli());
+		if (example.getAuthorities() != null && !example.getAuthorities().isEmpty()) {
+			whereClauses.add(" a in :authorities ");
+			paramaterMap.put("authorities", example.getAuthorities());
 		}
 		if (example.getTavolo() != null) {
 			whereClauses.add(" t =:tavolo ");
@@ -77,7 +77,7 @@ public class CustomUtenteRepositoryImpl implements CustomUtenteRepository {
 
 		queryBuilder.append(!whereClauses.isEmpty() ? " and " : "");
 		queryBuilder.append(StringUtils.join(whereClauses, " and "));
-		TypedQuery<Utente> typedQuery = entityManager.createQuery(queryBuilder.toString(), Utente.class);
+		TypedQuery<User> typedQuery = entityManager.createQuery(queryBuilder.toString(), User.class);
 
 		for (String key : paramaterMap.keySet()) {
 			typedQuery.setParameter(key, paramaterMap.get(key));
