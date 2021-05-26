@@ -10,7 +10,7 @@ import it.prova.pokeronline.model.User;
 import it.prova.pokeronline.security.repository.UserRepository;
 
 @Service
-public class UtenteServiceImpl implements UtenteService {
+public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserRepository repository;

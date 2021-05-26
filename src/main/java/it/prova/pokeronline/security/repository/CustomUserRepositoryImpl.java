@@ -1,4 +1,4 @@
-package it.prova.pokeronline.repository.utente;
+package it.prova.pokeronline.security.repository;
 
 import java.util.ArrayList;
 import java.util.HashMap;

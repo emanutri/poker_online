@@ -7,20 +7,20 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.prova.pokeronline.model.User;
-import it.prova.pokeronline.service.UtenteService;
-import it.prova.pokeronline.web.api.exception.UnouthorizedException;
+import it.prova.pokeronline.service.UserService;
 import it.prova.pokeronline.web.api.exception.UtenteNotFoundException;
 
 @RestController
@@ -28,35 +28,21 @@ import it.prova.pokeronline.web.api.exception.UtenteNotFoundException;
 public class UtenteController {
 
 	@Autowired
-	private UtenteService utenteService;
-
-//	@Autowired
-//	private RuoloService ruoloService;
+	private UserService utenteService;
 
 	@GetMapping
-	public ResponseEntity<List<User>> getAll(@RequestHeader("authorization") String username) {
-
-		User utenteInstance = utenteService.trovaByUsername(username);
-
-//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
-//			throw new UnouthorizedException("Utente non autorizzato");
-//		}
+	public ResponseEntity<List<User>> getAll() {
 
 		return ResponseEntity.ok().body(utenteService.listAllElements());
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<User> findById(@PathVariable(value = "id", required = true) long id,
-			@RequestHeader("authorization") String username) {
+	public ResponseEntity<User> findById(@PathVariable(value = "id", required = true) long id) {
 
-		User utenteInstance = utenteService.trovaByUsername(username);
+		User utenteInstance = utenteService.caricaSingoloElemento(id);
 
 		if (utenteInstance == null)
 			throw new UtenteNotFoundException("Utente not found con id: " + id);
-
-//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
-//			throw new UnouthorizedException("Utente non autorizzato");
-//		}
 
 		return ResponseEntity.ok().body(utenteInstance);
 	}
@@ -65,29 +51,18 @@ public class UtenteController {
 	// elencandoli grazie al ControllerAdvice
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<User> createNew(@Valid @RequestBody User utenteInput,
-			@RequestHeader("authorization") String username) {
+	public ResponseEntity<User> createNew(@Valid @RequestBody User utenteInput) {
 
-		User utenteInstance = utenteService.trovaByUsername(username);
-
-//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
-//			throw new UnouthorizedException("Utente non autorizzato");
-//		}
 		return ResponseEntity.ok().body(utenteService.inserisciNuovo(utenteInput));
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<User> update(@Valid @RequestBody User utenteInput, @PathVariable(required = true) Long id,
-			@RequestHeader("authorization") String username) {
+	public ResponseEntity<User> update(@Valid @RequestBody User utenteInput, @PathVariable(required = true) Long id) {
 
-		User utenteInstance = utenteService.trovaByUsername(username);
+		User utenteInstance = utenteService.caricaSingoloElemento(id);
 
 		if (utenteInstance == null)
 			throw new UtenteNotFoundException("Utente not found con id: " + id);
-
-//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
-//			throw new UnouthorizedException("Utente non autorizzato");
-//		}
 
 		utenteInput.setId(id);
 
@@ -96,48 +71,33 @@ public class UtenteController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public void delete(@PathVariable(required = true) Long id, @RequestHeader("authorization") String username) {
+	public void delete(@PathVariable(required = true) Long id) {
 
-		User utenteInstance = utenteService.trovaByUsername(username);
+		User utenteInstance = utenteService.caricaSingoloElemento(id);
 
 		if (utenteInstance == null)
 			throw new UtenteNotFoundException("Utente not found con id: " + id);
 
-//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
-//			throw new UnouthorizedException("Utente non autorizzato");
-//		}
-
-//		utenteInstance.setStato(StatoUtente.DISABILITATO);
 		utenteInstance.setEnabled(false);
-		utenteInstance.setId(id);
 		utenteService.aggiorna(utenteInstance);
 	}
 
 	@PostMapping("/search")
-	public ResponseEntity<List<User>> search(@RequestBody User example,
-			@RequestHeader("authorization") String username) {
-
-		User utenteInstance = utenteService.trovaByUsername(username);
-
-//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
-//			throw new UnouthorizedException("Utente non autorizzato");
-//		}
+	public ResponseEntity<List<User>> search(@RequestBody User example) {
 
 		return ResponseEntity.ok().body(utenteService.findByExample(example));
 	}
 
 	@PutMapping("/credito/{id}")
-	public ResponseEntity<User> caricaCredito(@RequestBody Double credito, @PathVariable(required = true) Long id,
-			@RequestHeader("authorization") String username) {
+	public ResponseEntity<User> caricaCredito(@RequestBody Double credito, @PathVariable(required = true) Long id) {
+
+		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = userDetails.getUsername();
 
 		User utenteInstance = utenteService.trovaByUsername(username);
 
 		if (utenteInstance == null)
 			throw new UtenteNotFoundException("Utente not found con id: " + id);
-
-//		if (!utenteInstance.getRuoli().contains(ruoloService.findById(1L))) {
-//			throw new UnouthorizedException("Utente non autorizzato");
-//		}
 
 		Double creditoUtente = utenteInstance.getCredito();
 

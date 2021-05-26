@@ -5,7 +5,7 @@ import java.util.List;
 import it.prova.pokeronline.model.Authority;
 import it.prova.pokeronline.model.User;
 
-public interface UtenteService {
+public interface UserService {
 
 	List<User> listAllElements();
 

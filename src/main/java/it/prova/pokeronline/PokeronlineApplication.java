@@ -15,7 +15,7 @@ import it.prova.pokeronline.model.Authority;
 import it.prova.pokeronline.model.AuthorityName;
 import it.prova.pokeronline.model.User;
 import it.prova.pokeronline.security.repository.AuthorityRepository;
-import it.prova.pokeronline.service.UtenteService;
+import it.prova.pokeronline.service.UserService;
 
 @SpringBootApplication
 public class PokeronlineApplication {
@@ -24,7 +24,7 @@ public class PokeronlineApplication {
 	AuthorityRepository authorityRepository;
 
 	@Autowired
-	private UtenteService utenteService;
+	private UserService utenteService;
 
 	@Autowired
 	PasswordEncoder passwordEncoder;
