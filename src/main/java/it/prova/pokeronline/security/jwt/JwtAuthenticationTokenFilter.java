@@ -26,7 +26,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
 	@Autowired
 	private JwtTokenUtil jwtUtils;
-	
+
 	@Autowired
 	private JwtUserDetailsServiceImpl userDetailsService;
 

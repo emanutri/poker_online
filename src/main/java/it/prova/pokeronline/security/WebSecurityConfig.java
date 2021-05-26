@@ -1,6 +1,5 @@
 package it.prova.pokeronline.security;
 
-
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,76 +22,64 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import it.prova.pokeronline.security.jwt.JwtAuthenticationEntryPoint;
 import it.prova.pokeronline.security.jwt.JwtAuthenticationTokenFilter;
 
-
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
+	@Autowired
+	private JwtAuthenticationEntryPoint unauthorizedHandler;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-    
-    @Autowired
-    private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+	@Autowired
+	private UserDetailsService userDetailsService;
 
-    @Autowired
-    public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        authenticationManagerBuilder
-                .userDetailsService(this.userDetailsService)
-                .passwordEncoder(passwordEncoder());
-    }
-    
-    @Bean
-    @Override
-     public AuthenticationManager authenticationManagerBean() throws Exception {
-          return super.authenticationManagerBean();
-    }  
+	@Autowired
+	private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    
-    // configurazione Cors per poter consumare le api restful con richieste ajax
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*");
-        configuration.setAllowedMethods(Arrays.asList("POST, PUT, GET, OPTIONS, DELETE"));
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+	@Autowired
+	public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+		authenticationManagerBuilder.userDetailsService(this.userDetailsService).passwordEncoder(passwordEncoder());
+	}
 
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-        		.cors().and().csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                // non abbiamo bisogno di una sessione
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeRequests()
-                .antMatchers(
-                        //HttpMethod.GET,
-                        "/",
-                        "/*.html",
-                        "/favicon.ico",
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js"
-                ).permitAll()
-                .antMatchers("/public/**").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/tavolo/**").hasAnyAuthority("ROLE_SPECIAL_PLAYER", "ROLE_ADMIN")
-                .antMatchers(HttpMethod.POST,"/api/player/**").hasAnyAuthority("ROLE_PLAYER", "ROLE_SPECIAL_PLAYER", "ROLE_ADMIN")
-                .antMatchers("/api/user/**").hasAnyAuthority("ROLE_ADMIN")
-                .anyRequest().authenticated();
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
+	}
 
-        // Filtro Custom JWT
-        httpSecurity.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
-        httpSecurity.headers().cacheControl();
-    }
+	// configurazione Cors per poter consumare le api restful con richieste ajax
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.addAllowedOrigin("*");
+		configuration.setAllowedMethods(Arrays.asList("POST, PUT, GET, OPTIONS, DELETE"));
+		configuration.addAllowedHeader("*");
+		configuration.addAllowedMethod("*");
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
+
+	@Override
+	protected void configure(HttpSecurity httpSecurity) throws Exception {
+		httpSecurity.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
+				.and()
+				// non abbiamo bisogno di una sessione
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
+				.antMatchers(
+						// HttpMethod.GET,
+						"/", "/*.html", "/favicon.ico", "/**/*.html", "/**/*.css", "/**/*.js")
+				.permitAll().antMatchers("/public/**").permitAll().antMatchers(HttpMethod.GET, "/api/tavolo/**")
+				.hasAnyAuthority("ROLE_SPECIAL_PLAYER", "ROLE_ADMIN").antMatchers(HttpMethod.POST, "/api/player/**")
+				.hasAnyAuthority("ROLE_PLAYER", "ROLE_SPECIAL_PLAYER", "ROLE_ADMIN").antMatchers("/api/user/**")
+				.hasAnyAuthority("ROLE_ADMIN").anyRequest().authenticated();
+
+		// Filtro Custom JWT
+		httpSecurity.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+		httpSecurity.headers().cacheControl();
+	}
 }

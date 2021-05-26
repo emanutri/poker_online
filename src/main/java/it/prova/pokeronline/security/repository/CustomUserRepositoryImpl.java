@@ -22,14 +22,13 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 
 	@Transactional
 	public void aggiungiRuolo(User utenteEsistente, Authority ruoloInstance) {
-		
-		//ruoloInstance = entityManager.merge(ruoloInstance);
-		//utenteEsistente = entityManager.merge(utenteEsistente);
-		
+
+		// ruoloInstance = entityManager.merge(ruoloInstance);
+		// utenteEsistente = entityManager.merge(utenteEsistente);
 
 		utenteEsistente.getAuthorities().add(ruoloInstance);
 	}
-	
+
 	@Override
 	public List<User> findByExample(User example) {
 		Map<String, Object> paramaterMap = new HashMap<String, Object>();

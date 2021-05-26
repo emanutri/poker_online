@@ -11,5 +11,5 @@ public interface TavoloRepository extends CrudRepository<Tavolo, Long>, CustomTa
 
 	@Query("select t from Tavolo t where t.esperienzaMin <= ?1")
 	List<Tavolo> findAllTavoloByEsperienza(Double esperienza);
-	
+
 }

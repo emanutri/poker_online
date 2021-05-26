@@ -24,38 +24,35 @@ import it.prova.pokeronline.security.jwt.dto.JwtUserDetailsImpl;
 @RestController
 public class AuthenticationRestController {
 
-    @Value("${jwt.header}")
-    private String tokenHeader;
+	@Value("${jwt.header}")
+	private String tokenHeader;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtTokenUtil jwtUtils;
+	@Autowired
+	private JwtTokenUtil jwtUtils;
 
-    @PostMapping(value = "public/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody JwtAuthenticationRequest loginRequest) {
+	@PostMapping(value = "public/login")
+	public ResponseEntity<?> authenticateUser(@Valid @RequestBody JwtAuthenticationRequest loginRequest) {
 
-    	//effettuo l'autenticazione
+		// effettuo l'autenticazione
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-		//metto lo user nel contesto di spring security
+		// metto lo user nel contesto di spring security
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		
-		//genero il token
+
+		// genero il token
 		String jwt = jwtUtils.generateJwtToken(authentication);
-		
-		//estraggo le info dal principal
-		JwtUserDetailsImpl userDetails = (JwtUserDetailsImpl) authentication.getPrincipal();		
-		List<String> roles = userDetails.getAuthorities().stream()
-				.map(item -> item.getAuthority())
+
+		// estraggo le info dal principal
+		JwtUserDetailsImpl userDetails = (JwtUserDetailsImpl) authentication.getPrincipal();
+		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 
-		return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, 
-												 userDetails.getUsername(), 
-												 userDetails.getEmail(), 
-												 roles));
+		return ResponseEntity
+				.ok(new JwtAuthenticationResponse(jwt, userDetails.getUsername(), userDetails.getEmail(), roles));
 	}
 
 }

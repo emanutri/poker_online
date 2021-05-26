@@ -22,11 +22,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
 
-@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "user")
-public class User implements Serializable{
+public class User implements Serializable {
 
 	/**
 	 * 
@@ -53,7 +53,7 @@ public class User implements Serializable{
 	@NotBlank(message = "{password.notblank}")
 	@Column(name = "password")
 	private String password;
-	
+
 	@NotBlank(message = "{email.notblank}")
 	@Column(name = "email")
 	private String email;
@@ -62,10 +62,6 @@ public class User implements Serializable{
 	@Column(name = "data_registrazione")
 	private Date dataRegistrazione;
 
-//	@NotNull(message = "{stato.notnull}")
-//	@Enumerated(EnumType.STRING)
-//	private StatoUtente stato = StatoUtente.ATTIVO;
-	
 	@Column(name = "enabled")
 	@NotNull
 	private Boolean enabled;
@@ -80,17 +76,12 @@ public class User implements Serializable{
 	@Column(name = "credito")
 	private Double credito;
 
-//	@NotEmpty(message = "{ruoli.notempty}")
-//	@ManyToMany
-//	@JoinTable(name = "utente_ruolo", joinColumns = @JoinColumn(name = "utente_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "ruolo_id", referencedColumnName = "id"))
-//	private Set<Ruolo> ruoli = new HashSet<>(0);
-
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "users_authorities", joinColumns = {
 			@JoinColumn(name = "user_username", referencedColumnName = "username") }, inverseJoinColumns = {
 					@JoinColumn(name = "authority_id", referencedColumnName = "id") })
 	private List<Authority> authorities;
-	
+
 	@JsonIgnoreProperties(value = { "utenti", "utenteCreazione" })
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tavolo_id")
@@ -173,14 +164,6 @@ public class User implements Serializable{
 		this.dataRegistrazione = dataRegistrazione;
 	}
 
-//	public StatoUtente getStato() {
-//		return stato;
-//	}
-//
-//	public void setStato(StatoUtente stato) {
-//		this.stato = stato;
-//	}
-
 	public Double getEsperienzaAccumulata() {
 		return esperienzaAccumulata;
 	}
@@ -197,27 +180,12 @@ public class User implements Serializable{
 		this.credito = credito;
 	}
 
-//	public Set<Ruolo> getRuoli() {
-//		return ruoli;
-//	}
-//
-//	public void setRuoli(Set<Ruolo> ruoli) {
-//		this.ruoli = ruoli;
-//	}
-
 	public Tavolo getTavolo() {
 		return tavolo;
 	}
 
 	public void setTavolo(Tavolo tavolo) {
 		this.tavolo = tavolo;
-	}
-
-	
-	@Override
-	public String toString() {
-		return "User: [id=" + id + ", username=" + username + ", esperienzaAccumulata=" + esperienzaAccumulata
-				+ ", credito=" + credito + "]";
 	}
 
 	public Boolean getEnabled() {
@@ -242,6 +210,12 @@ public class User implements Serializable{
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	@Override
+	public String toString() {
+		return "User: [id=" + id + ", username=" + username + ", esperienzaAccumulata=" + esperienzaAccumulata
+				+ ", credito=" + credito + "]";
 	}
 
 }
